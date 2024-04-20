@@ -19,7 +19,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    BakingScreen()
+                    HomeScreen()
+//                    MealPlannerScreen()
+//                    ShoppingListScreen()
+//                    NutritionalInfoScreen()
                 }
             }
         }
