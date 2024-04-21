@@ -1,6 +1,7 @@
 package com.example.smartforks
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smartforks.model.ApiResponse
@@ -37,8 +38,10 @@ class MealPlanViewModel : ViewModel() {
                         text(prompt)
                     }
                 )
+
                 response.text?.let { outputContent ->
-                    _uiState.value = UiState.SuccessObj(mapJsonResponse(outputContent))
+                    Log.d("Res", outputContent)
+                    _uiState.value = UiState.Success(outputContent)
                 }
 //                val mealPlan = mapJsonResponse(response.text.toString())
 //                _uiState.value = UiState.SuccessObj(mealPlan)
@@ -46,14 +49,17 @@ class MealPlanViewModel : ViewModel() {
 //                    _uiState.value = UiState.SuccessObj(outputContent)
 //                }
             } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.localizedMessage ?: "")
+                _uiState.value = UiState.Error(e.toString())
             }
         }
     }
 
     private fun mapJsonResponse(jsonString: String): List<ApiResponse> {
         val gson = Gson()
-        val jsonArray = JsonParser.parseString(jsonString).asJsonArray
+        /*val startIndex = jsonString.indexOf('n') + 1
+        val endIndex = jsonString.lastIndexOf('`') - 1
+        val jsonPart = jsonString.substring(startIndex, endIndex)*/
+        val jsonArray = JsonParser.parseString(jsonString.trimIndent()).asJsonArray
         val apiResponseList = mutableListOf<ApiResponse>()
 
         for (jsonElement in jsonArray) {

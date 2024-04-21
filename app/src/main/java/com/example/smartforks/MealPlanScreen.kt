@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -20,9 +21,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.smartforks.model.ApiResponse
 import com.google.gson.Gson
 import com.google.gson.JsonParser
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MealPlannerScreen(
     mealPlanViewModel: MealPlanViewModel = viewModel(),
@@ -57,7 +58,7 @@ fun MealPlannerScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(paddingValues = it),
             color = MaterialTheme.colorScheme.background
         ) {
             Column(
@@ -66,27 +67,31 @@ fun MealPlannerScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (uiState is UiState.Loading) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    Log.d("Loading", "Here")
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        color = Color.Black
+                    )
                 } else {
                     var textColor = MaterialTheme.colorScheme.onSurface
                     if (uiState is UiState.Error) {
                         textColor = MaterialTheme.colorScheme.error
                         result = (uiState as UiState.Error).errorMessage
-                    } else if (uiState is UiState.SuccessObj) {
+                    } else if (uiState is UiState.Success) {
                         textColor = MaterialTheme.colorScheme.onSurface
-                        result = (uiState as UiState.SuccessObj).outputObj.toString()
+                        result = (uiState as UiState.Success).outputText
                     }
                     val scrollState = rememberScrollState()
-                    Text(
-                        text = result,
-                        textAlign = TextAlign.Start,
+
+                    val parts: List<String> = result.split("\\$\\$\\$")
+
+                    MarkdownText(markdown = parts[0],
                         color = textColor,
                         modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(16.dp)
-                            .fillMaxSize()
-                            .verticalScroll(scrollState)
-                    )
+                        .align(Alignment.CenterHorizontally)
+                        .padding(16.dp)
+                        .fillMaxSize()
+                        .verticalScroll(scrollState))
                 }
             }
         }
