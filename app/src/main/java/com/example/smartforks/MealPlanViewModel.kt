@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+
 class MealPlanViewModel : ViewModel() {
     private val _uiState: MutableStateFlow<UiState> =
         MutableStateFlow(UiState.Initial)
@@ -46,8 +47,15 @@ class MealPlanViewModel : ViewModel() {
 //                val mealPlan = mapJsonResponse(response.text.toString())
 //                _uiState.value = UiState.SuccessObj(mealPlan)
 //                response.text?.let { outputContent ->
-//                    _uiState.value = UiState.SuccessObj(outputContent)
+//                    for(c in outputContent)
+////                    Log.d("testing here: ", outputContent)
+//                    _uiState.value = UiState.SuccessObj(mapJsonResponse(outputContent))
 //                }
+//                val mealPlan = mapJsonResponse(response.text.toString())
+//                _uiState.value = UiState.SuccessObj(mealPlan)
+                response.text?.let { outputContent ->
+                    _uiState.value = UiState.Success(outputContent)
+                }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.toString())
             }

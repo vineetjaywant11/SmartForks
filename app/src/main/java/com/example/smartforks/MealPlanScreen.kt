@@ -1,6 +1,6 @@
 package com.example.smartforks
+import java.util.regex.Pattern
 
-import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +35,6 @@ fun MealPlannerScreen(
     val placeholderResult = stringResource(R.string.results_placeholder)
     var result by rememberSaveable { mutableStateOf(placeholderResult) }
     LaunchedEffect(Unit) {
-        Log.d("testMP", prompt)
         mealPlanViewModel.sendPrompt(prompt)
     }
 
@@ -67,7 +66,6 @@ fun MealPlannerScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (uiState is UiState.Loading) {
-                    Log.d("Loading", "Here")
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                         color = Color.Black
@@ -82,9 +80,10 @@ fun MealPlannerScreen(
                         result = (uiState as UiState.Success).outputText
                     }
                     val scrollState = rememberScrollState()
-
+//                    Log.d("here:", result)
+                    val (breakfast, lunch, dinner) = splitMealContent(result.trimIndent())
                     MarkdownText(
-                        markdown = splitMeals(result)[0],
+                        markdown = "## LUNCH\n" + lunch,
                         color = textColor,
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
@@ -98,25 +97,43 @@ fun MealPlannerScreen(
     }
 }
 
-fun splitMeals(input: String): List<String> {
-    val keywords = listOf("**Breakfast", "**Lunch", "**Dinner")
-    val parts = mutableListOf<String>()
-    var startIndex = 0
-
-    // Loop over the string to find the keywords
-    for (i in input.indices) { // Check boundary to avoid out of bounds
-        if (i + 10 < input.length) {
-            val substring = input.substring(i, i + 7)
-            if (keywords.any { substring.startsWith(it) }) {
-                if (startIndex != i) {
-                    parts.add(input.substring(startIndex, i))
-                }
-                startIndex = i
-            }
-        }
+fun splitMealContent(content: String): Triple<String, String, String> {
+    val pattern = Pattern.compile("""(?<=\*\*Breakfast\*\*)(.*?)(?=\*\*Lunch\*\*)""", Pattern.DOTALL)
+    val breakfast = pattern.matcher(content).let {
+        if (it.find()) it.group(1).trim() else ""
     }
-    // Add the last part
-    parts.add(input.substring(startIndex))
 
-    return parts
+    val pattern2 = Pattern.compile("""(?<=\*\*Lunch\*\*)(.*?)(?=\*\*Dinner\*\*)""", Pattern.DOTALL)
+    val lunch = pattern2.matcher(content).let {
+        if (it.find()) it.group(1).trim() else ""
+    }
+
+    val pattern3 = Pattern.compile("""(?<=\*\*Dinner\*\*)(.*?)$""", Pattern.DOTALL)
+    val dinner = pattern3.matcher(content).let {
+        if (it.find()) it.group(1).trim() else ""
+    }
+
+    return Triple(breakfast, lunch, dinner)
 }
+
+//fun splitMealContent(content: String): Triple<String, String, String> {
+//    // Pattern to capture the content after "**Breakfast" up to "**Lunch"
+//    val pattern = Pattern.compile("""\*\*.*?Breakfast.*?(.*?)(?=\*\*.*?Lunch)""", Pattern.DOTALL)
+//    val breakfast = pattern.matcher(content).let {
+//        if (it.find()) it.group(1).trim() else ""
+//    }
+//
+//    // Pattern to capture the content after "**Lunch" up to "**Dinner"
+//    val pattern2 = Pattern.compile("""\*\*.*?Lunch.*?(.*?)(?=\*\*.*?Dinner)""", Pattern.DOTALL)
+//    val lunch = pattern2.matcher(content).let {
+//        if (it.find()) it.group(1).trim() else ""
+//    }
+//
+//    // Pattern to capture the content after "**Dinner" to the end of the string
+//    val pattern3 = Pattern.compile("""\*\*.*?Dinner.*?(.*?)$""", Pattern.DOTALL)
+//    val dinner = pattern3.matcher(content).let {
+//        if (it.find()) it.group(1).trim() else ""
+//    }
+//
+//    return Triple(breakfast, lunch, dinner)
+//}

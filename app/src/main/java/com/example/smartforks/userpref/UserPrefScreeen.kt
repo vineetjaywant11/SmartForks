@@ -70,7 +70,7 @@ enum class Screen {
 
 fun createMealPlanPrompt(userPrefs: UserPreferences): String {
     return """
-        make a step-by-step meal plan(breakfast, lunch, dinner) for me with a detailed process
+        make a daily step-by-step meal plan(breakfast, lunch, dinner) for me with a detailed process
         height: ${userPrefs.height} cm
         weight: ${userPrefs.weight}lb
         dietary pref: ${userPrefs.dietaryPref ?: "None"}

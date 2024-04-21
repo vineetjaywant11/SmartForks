@@ -67,12 +67,15 @@ class MainActivity : ComponentActivity() {
 
 fun createMealPlanPrompt(userPrefs: UserPreferences): String {
     return """
-        make a step-by-step meal plan(breakfast, lunch, dinner) for me with a detailed process
+        make a daily step-by-step meal plan(breakfast, lunch, dinner) for me with a detailed process
         height: ${userPrefs.height} cm
         weight: ${userPrefs.weight}lb
         dietary pref: ${userPrefs.dietaryPref ?: "None"}
         allergies: ${userPrefs.allergies ?: "None"}
         goal: ${userPrefs.goal}
         output format(Markdown): name, macros, ingredients, process
+        
+        don't add anything like time or macros or : in front of headings like breakfast, lunch and dinner
+        
     """
 }
