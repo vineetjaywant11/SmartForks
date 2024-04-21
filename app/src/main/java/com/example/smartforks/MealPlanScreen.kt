@@ -83,17 +83,40 @@ fun MealPlannerScreen(
                     }
                     val scrollState = rememberScrollState()
 
-                    val parts: List<String> = result.split("\\$\\$\\$")
-
-                    MarkdownText(markdown = parts[0],
+                    MarkdownText(
+                        markdown = splitMeals(result)[0],
                         color = textColor,
                         modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(16.dp)
-                        .fillMaxSize()
-                        .verticalScroll(scrollState))
+                            .align(Alignment.CenterHorizontally)
+                            .padding(16.dp)
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                    )
                 }
             }
         }
     }
+}
+
+fun splitMeals(input: String): List<String> {
+    val keywords = listOf("**Breakfast", "**Lunch", "**Dinner")
+    val parts = mutableListOf<String>()
+    var startIndex = 0
+
+    // Loop over the string to find the keywords
+    for (i in input.indices) { // Check boundary to avoid out of bounds
+        if (i + 10 < input.length) {
+            val substring = input.substring(i, i + 7)
+            if (keywords.any { substring.startsWith(it) }) {
+                if (startIndex != i) {
+                    parts.add(input.substring(startIndex, i))
+                }
+                startIndex = i
+            }
+        }
+    }
+    // Add the last part
+    parts.add(input.substring(startIndex))
+
+    return parts
 }

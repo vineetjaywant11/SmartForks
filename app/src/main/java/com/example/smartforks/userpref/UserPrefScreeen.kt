@@ -72,11 +72,10 @@ fun createMealPlanPrompt(userPrefs: UserPreferences): String {
     return """
         make a step-by-step meal plan(breakfast, lunch, dinner) for me with a detailed process
         height: ${userPrefs.height} cm
-        weight: ${userPrefs.weight}kg
+        weight: ${userPrefs.weight}lb
         dietary pref: ${userPrefs.dietaryPref ?: "None"}
         allergies: ${userPrefs.allergies ?: "None"}
         goal: ${userPrefs.goal}
         output format(Markdown): name, macros, ingredients, process
-        add $$$ before lunch and dinner start.
     """
 }

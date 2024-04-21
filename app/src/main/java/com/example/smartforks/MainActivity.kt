@@ -12,8 +12,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.smartforks.data.DataStore
+import com.example.smartforks.model.UserPreferences
 import com.example.smartforks.ui.theme.SmartForksTheme
 import com.example.smartforks.userpref.UserPrefScreen
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
@@ -26,21 +29,50 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    val currentScreen = remember { mutableStateOf("User") }
+                    val store = DataStore(this)
+                    var screen by remember { mutableStateOf("User") }
+                    runBlocking {
+                        if (store.getHeight.first().isNotEmpty()) {
+                            screen = "Meal"
+                        }
+                    }
+
                     var prompt by remember {
                         mutableStateOf("")
                     }
-                    when (currentScreen.value) {
+
+                    val userPrefs = runBlocking {
+                        UserPreferences(
+                            height = store.getHeight.first(),
+                            weight = store.getWeight.first(),
+                            dietaryPref = store.getDiet.first(),
+                            allergies = store.getAllergy.first(),
+                            goal = store.getGoal.first()
+                        )
+                    }
+                    when (screen) {
                         "User" -> UserPrefScreen(getPrompt = {
                             Log.d("test1", it)
                             prompt = it
-                            currentScreen.value = "Meal"
+                            screen = "Meal"
                         })
 
-                        "Meal" -> MealPlannerScreen(prompt = prompt)
+                        "Meal" -> MealPlannerScreen(prompt = createMealPlanPrompt(userPrefs))
                     }
                 }
             }
         }
     }
+}
+
+fun createMealPlanPrompt(userPrefs: UserPreferences): String {
+    return """
+        make a step-by-step meal plan(breakfast, lunch, dinner) for me with a detailed process
+        height: ${userPrefs.height} cm
+        weight: ${userPrefs.weight}lb
+        dietary pref: ${userPrefs.dietaryPref ?: "None"}
+        allergies: ${userPrefs.allergies ?: "None"}
+        goal: ${userPrefs.goal}
+        output format(Markdown): name, macros, ingredients, process
+    """
 }
