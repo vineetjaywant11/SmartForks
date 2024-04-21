@@ -21,7 +21,7 @@ class MealPlanViewModel : ViewModel() {
         _uiState.asStateFlow()
 
     private val generativeModel = GenerativeModel(
-        modelName = "gemini-pro-vision",
+        modelName = "gemini-pro",
         apiKey = BuildConfig.apiKey
     )
 
@@ -37,9 +37,11 @@ class MealPlanViewModel : ViewModel() {
                         text(prompt)
                     }
                 )
-
-                var mealPlan = generateMealPlan(response.text.toString())
-                _uiState.value = UiState.SuccessObj(mealPlan)
+                response.text?.let { outputContent ->
+                    _uiState.value = UiState.SuccessObj(mapJsonResponse(outputContent))
+                }
+//                val mealPlan = mapJsonResponse(response.text.toString())
+//                _uiState.value = UiState.SuccessObj(mealPlan)
 //                response.text?.let { outputContent ->
 //                    _uiState.value = UiState.SuccessObj(outputContent)
 //                }
@@ -49,41 +51,7 @@ class MealPlanViewModel : ViewModel() {
         }
     }
 
-    fun generateMealPlan(JSON_DATA: String): List<ApiResponse> {
-        var apiResponseList = mapJsonResponse(JSON_DATA)
-//        val mealPlan = mutableListOf<String>()
-
-//        for (apiResponse in apiResponseList) {
-//            // Access properties of each ApiResponse object
-//            val day = apiResponse.Day
-//            val breakfast = apiResponse.Breakfast
-//            val lunch = apiResponse.Lunch
-//            val dinner = apiResponse.Dinner
-//
-//            // Access properties of Breakfast, Lunch, and Dinner objects
-//            val breakfastName = breakfast?.name
-//            val breakfastIngredients = breakfast?.ingredients
-//            val breakfastProcess = breakfast?.process
-//            val breakfastMacros = breakfast?.macros
-//
-//            val lunchName = lunch?.name
-//            val lunchIngredients = lunch?.ingredients
-//            val lunchProcess = lunch?.process
-//            val lunchMacros = lunch?.macros
-//
-//            val dinnerName = dinner?.name
-//            val dinnerIngredients = dinner?.ingredients
-//            val dinnerProcess = dinner?.process
-//            val dinnerMacros = dinner?.macros
-//
-//            // Do something with the data
-//            // println("Day: $day")
-//        }
-
-        return apiResponseList
-    }
-
-    fun mapJsonResponse(jsonString: String): List<ApiResponse> {
+    private fun mapJsonResponse(jsonString: String): List<ApiResponse> {
         val gson = Gson()
         val jsonArray = JsonParser.parseString(jsonString).asJsonArray
         val apiResponseList = mutableListOf<ApiResponse>()
