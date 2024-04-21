@@ -12,72 +12,62 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.smartforks.ui.theme.SmartForksTheme
 import android.net.Uri
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import coil.compose.rememberAsyncImagePainter
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NutritionalInfoScreen() {
+fun NutritionalInfoScreen(modifier: Modifier) {
     var searchText by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var nutritionalInfo by remember { mutableStateOf("Enter a dish name or take a photo to see nutritional info.") }
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-        if (bitmap != null) {
-            // Process the image here. For now, just set a placeholder response.
-            nutritionalInfo = "Nutritional info for the captured dish: [Placeholder Data]"
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Nutritional Information") },
-            )
-        },
-        content = { innerPadding ->  // This PaddingValues tells you the area not occluded by app bars etc.
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)  // Apply the padding to the content inside the Scaffold
-                    .padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    TextField(
-                        value = searchText,
-                        onValueChange = { searchText = it },
-                        label = { Text("Search for a dish") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Button(
-                        onClick = { /* Search and fetch nutritional data */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Get Nutritional Info")
-                    }
-                    Button(
-                        onClick = { launcher.launch(null) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Take a Photo")
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(nutritionalInfo, style = MaterialTheme.typography.bodyLarge)
-                }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                imageUri = it
             }
         }
     )
-}
+    /*val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+            if (bitmap != null) {
+                // Process the image here. For now, just set a placeholder response.
+                nutritionalInfo = "Nutritional info for the captured dish: [Placeholder Data]"
+            }
+        }*/
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewNutritionalInfoScreen() {
-    SmartForksTheme {
-        NutritionalInfoScreen()
+    // This PaddingValues tells you the area not occluded by app bars etc.
+    Surface(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column {
+            imageUri?.let {
+                Image(
+                    painter = rememberAsyncImagePainter(model = imageUri),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(36.dp)
+                )
+            }
+
+            TextButton(
+                onClick = {
+                    galleryLauncher.launch("image/*")
+                }
+            ) {
+                Text(
+                    text = "Pick image"
+                )
+            }
+        }
+
     }
 }
