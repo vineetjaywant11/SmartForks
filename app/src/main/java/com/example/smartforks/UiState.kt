@@ -21,7 +21,6 @@ sealed interface UiState {
      * Text has been generated
      */
     data class Success(val outputText: String) : UiState
-    data class SuccessObj(val outputObj: List<ApiResponse>) : UiState
 
     /**
      * There was an error generating text

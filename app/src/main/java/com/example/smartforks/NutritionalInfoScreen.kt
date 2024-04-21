@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -28,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,63 +45,63 @@ fun NutritionalInfoScreen(
 ) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var nutritionalInfo by remember { mutableStateOf("Enter a dish name or take a photo to see nutritional info.") }
-    val placeholderPrompt =
-        "Recognise the dish and exact nuritional value of it including the macros"
-    val placeholderResult = ""
+
+    val placeholderPrompt = """
+        Recognise the dish and exact nutritional value of it including the macros
+        Output format: Markdown
+        
+        Description: Short description of the dish in 2-3 sentences
+        
+        Macro: Value
+    """.trimIndent()
     var prompt by rememberSaveable { mutableStateOf(placeholderPrompt) }
-    var result by rememberSaveable { mutableStateOf(placeholderResult) }
     val uiState by bakingViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val placeholderResult = ""
+    var result by rememberSaveable { mutableStateOf(placeholderResult) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
-        onResult = { uri ->
-            uri?.let {
-                imageUri = it
-            }
-        }
+        onResult = { uri -> uri?.let { imageUri = it } }
     )
 
-    // This PaddingValues tells you the area not occluded by app bars etc.
     Surface(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
+        modifier = modifier.fillMaxSize().padding(horizontal = 16.dp),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             imageUri?.let {
                 Image(
-                    painter = rememberAsyncImagePainter(model = imageUri),
+                    painter = rememberAsyncImagePainter(model = it),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(200.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    contentScale = ContentScale.Fit
                 )
             }
 
             Button(
-                onClick = {
-                    galleryLauncher.launch("image/*")
-                }
+                onClick = { galleryLauncher.launch("image/*") },
+                modifier = Modifier.padding(top = 16.dp)
             ) {
-                Text(
-                    text = "Pick image"
-                )
+                Text("Pick image")
             }
 
-            Button(
-                onClick = {
-                    val bitmap = imageUri?.let { uriToBitmap(context, it) }
-                    if (bitmap != null) {
-                        bakingViewModel.sendPrompt(bitmap, prompt)
-                    }
+            imageUri?.let {
+                Button(
+                    onClick = {
+                        val bitmap = uriToBitmap(context, it)
+                        bitmap?.let { bmp ->
+                            bakingViewModel.sendPrompt(bmp, prompt)
+                        }
+                    },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("Analyse and give details")
                 }
-
-            ) {
-                Text(
-                    text = "Analyse and give details"
-                )
             }
+
             if (uiState is UiState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -126,6 +128,7 @@ fun NutritionalInfoScreen(
                 )
             }
         }
+
     }
 }
 
