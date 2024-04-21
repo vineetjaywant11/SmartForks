@@ -20,7 +20,6 @@ import coil.compose.rememberAsyncImagePainter
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun NutritionalInfoScreen(modifier: Modifier) {
-    var searchText by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var nutritionalInfo by remember { mutableStateOf("Enter a dish name or take a photo to see nutritional info.") }
 
@@ -32,13 +31,6 @@ fun NutritionalInfoScreen(modifier: Modifier) {
             }
         }
     )
-    /*val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            if (bitmap != null) {
-                // Process the image here. For now, just set a placeholder response.
-                nutritionalInfo = "Nutritional info for the captured dish: [Placeholder Data]"
-            }
-        }*/
 
     // This PaddingValues tells you the area not occluded by app bars etc.
     Surface(
@@ -53,12 +45,11 @@ fun NutritionalInfoScreen(modifier: Modifier) {
                     painter = rememberAsyncImagePainter(model = imageUri),
                     contentDescription = null,
                     modifier = Modifier
-                        .clip(CircleShape)
-                        .size(36.dp)
+                        .size(200.dp)
                 )
             }
 
-            TextButton(
+            Button(
                 onClick = {
                     galleryLauncher.launch("image/*")
                 }
