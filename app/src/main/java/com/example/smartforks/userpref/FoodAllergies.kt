@@ -142,6 +142,8 @@ fun AllergyChip(
         selected = selected,
         shape = RoundedCornerShape(20.dp),
         border = InputChipDefaults.inputChipBorder(
+            enabled = true,
+            selected = selected,
             selectedBorderColor = MaterialTheme.colorScheme.primary,
             selectedBorderWidth = 1.dp
         ),

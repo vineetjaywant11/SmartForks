@@ -98,8 +98,8 @@ fun DietPreferences(onNext: () -> Unit) {
             Button(
                 onClick = {
                     CoroutineScope(Dispatchers.IO).launch {
-                        store.saveDiet(selectedValues.joinToString(",") + " " +additionalText)
-                        Log.d("test", selectedValues.joinToString(",") + " " +additionalText)
+                        store.saveDiet(selectedValues.joinToString(",") + " " + additionalText)
+                        Log.d("test", selectedValues.joinToString(",") + " " + additionalText)
                     }
                     onNext()
                 },
@@ -142,6 +142,8 @@ fun DietChip(
         selected = selected,
         shape = RoundedCornerShape(20.dp),
         border = InputChipDefaults.inputChipBorder(
+            enabled = true,
+            selected = selected,
             selectedBorderColor = MaterialTheme.colorScheme.primary,
             selectedBorderWidth = 1.dp
         ),
